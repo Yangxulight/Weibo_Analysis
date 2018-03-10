@@ -3,6 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from setup import PATH_TO_DATABASE, PATH_TO_PROJECT, COOKIE_FILE_NAME
 from os import path
 import pickle
+from utils.scrape_logger import scrape_logger as logger
 
 class Cookie:
     def __init__(self, username, password, url):
@@ -12,6 +13,7 @@ class Cookie:
         self.file_name = COOKIE_FILE_NAME
     
     def save_cookeis(self):
+        logger.debug("saving cookies.")
         driver = webdriver.Chrome()
         driver.get(self.url)
         login_button = driver.find_element_by_class_name("ut").find_element_by_tag_name('a')[0]
@@ -25,7 +27,8 @@ class Cookie:
         pickle.dump(cookie, open(path.join(PATH_TO_DATABASE, self.file_name), "wb"))
 
     @staticmethod
-    def load_cookies(cls):
+    def load_cookies():
+        logger.debug("loading cookies.")
         return pickle.load(open(path.join(PATH_TO_DATABASE, COOKIE_FILE_NAME),"rb"))
 
 
