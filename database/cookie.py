@@ -25,7 +25,7 @@ class Cookie:
         pickle.dump(cookie, open(path.join(PATH_TO_DATABASE, self.file_name), "wb"))
 
     @staticmethod
-    def load_cookies(cls):
+    def load_cookies():
         return pickle.load(open(path.join(PATH_TO_DATABASE, COOKIE_FILE_NAME),"rb"))
 
 
