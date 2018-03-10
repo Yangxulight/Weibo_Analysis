@@ -5,7 +5,7 @@ from database.cookie import Cookie
 import time
 from mongodb import MongoDB
 import datetime
-
+from utils.scrape_logger import scrape_logger as logger
 
 class WeiboData:
     login_url = "https://weibo.cn"
@@ -57,6 +57,7 @@ class WeiboData:
 
 
     def build_request(self, cookies):
+        logger.debug("building request with cookies".format(cookies))
         request = requests.Session()
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'}
         request.headers.update(headers)
@@ -67,6 +68,7 @@ class WeiboData:
     def fetch_user_info(self, uid, request, timeout):
         info_url = self.info_base_url.format(uid,1)
         time.sleep(timeout)
+        logger.debug("fetching user info from {}".format(uid))
         response = request.get(info_url)
         matchObj = self.info_pattern.search(response.content.decode('utf-8'))
         info = {}
@@ -77,17 +79,17 @@ class WeiboData:
         return info
 
     def fetch_user_weibo(self, uid, request, timeout):
+        logger.debug("fetching weibo content from {}".format(uid))
         weibos = []
         weibo_url = self.weibo_base_url.format(uid, 1)
         time.sleep(timeout)
+        logger.debug("fetching weibo from {} at page {}".format(uid, 1))
         response = request.get(weibo_url)
         max_page_obj = self.weibo_page_pattern.search(response.content.decode('uft-8'))
         if max_page_obj is None:
             max_page = 1
         else:
             max_page = int(max_page_obj.group(1))
-        response = request.get(weibo_url)
-        timeout.sleep(timeout)
         weibo_list = re.findall(self.weibo_page_pattern, response.decode('utf-8'))
         for w in weibo_list:
             weibo = {}
@@ -100,6 +102,7 @@ class WeiboData:
         for i in range(2, max_page+1):
             weibo_url = self.weibo_base_url.format(uid, i)
             time.sleep(timeout)
+            logger.debug("fetching weibo from {} at page {}".format(uid, i))
             response = request.get(weibo_url)
             weibo_list = re.findall(self.weibo_page_pattern, response.content.decode('utf-8'))
             for w in weibo_list:
@@ -116,6 +119,7 @@ class WeiboData:
         basic = {}
         url = self.weibo_base_url.format(uid, 1)
         time.sleep(timeout)
+        logger.debug("fetching basic data from {}".format(uid))
         response = request.get(url)
         basic_boj = self.basic_pattern.search(response.content.decode('utf-8'))
         basic['weibo_num'] = basic_boj.group[1]
@@ -125,6 +129,7 @@ class WeiboData:
 
     def fetch_user_data(self, timeout=2):
         db = MongoDB(host="localhost", port=27017)
+        logger.debug("fetch userlist from db")
         fetched_users = { item['uid'] for item in db.query(collection='user',db_name='weibo_database',condition="")}
         uid_list = [item for item in self.fetch_user_list and item not in fetched_users]
         cookies = Cookie.load_cookies()

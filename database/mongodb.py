@@ -1,12 +1,15 @@
 from pymongo import MongoClient
+from utils.scrape_logger import scrape_logger as logger
 
 class MongoDB:
     def __init__(self, host="localhost", port=27017):
         self.host = host
         self.port = port
+        logger.debug("connecting to mongodb at {}:{}".format(host, port))
         self.client = MongoClient('{}:{}'.format(host, port))
         
     def save_document(self, collection="weibo", db_name="weibo_database", data):
+        logger.debug("saving document to condition:{}".format(collection))
         db_collection = self.dispatch(collection, db_name)
         if type(data) == list:
             db_collection.insert_many(data)
@@ -17,6 +20,7 @@ class MongoDB:
         return self.client[db_name][collection]
 
     def query(self, collection, db_name="weibo_database", condition = ""):
+        logger.debug("query from collection:{} with condition{}".format(collection, condition))
         db_collection = self.dispatch(collection, db_name)
         result_list = []
         if condition == "":
