@@ -6,6 +6,7 @@ import time
 from mongodb import MongoDB
 import datetime
 from utils.scrape_logger import scrape_logger as logger
+import json
 
 class WeiboData:
     login_url = "https://weibo.cn"
@@ -134,17 +135,23 @@ class WeiboData:
         uid_list = [item for item in self.fetch_user_list and item not in fetched_users]
         cookies = Cookie.load_cookies()
         request = self.build_request(cookies)
-        for uid in uid_list:
-            data = {}
-            data['uid'] = uid
-            data['weibos'] = self.fetch_user_weibo(uid, request, timeout)
-            data['info'] = self.fetch_user_info(uid, request,timeout)
-            data['basic'] = self.fetch_basic_data(uid, request, timeout)
-            user = {}
-            user['uid'] = uid
-            user['last_fetched'] = datetime.datetime.now()
-            db.save_document(collection="weibo",db_name="weibo_database", data)
-            db.save_document(collection='user', db_name='weibo_database', user)
+        with open("cache/weibodata.txt", 'a+') as d, open("cache/userdata.txt", 'a+') as u:
+            for uid in uid_list:
+                data = {}
+                data['uid'] = uid
+                data['weibos'] = self.fetch_user_weibo(uid, request, timeout)
+                data['info'] = self.fetch_user_info(uid, request,timeout)
+                data['basic'] = self.fetch_basic_data(uid, request, timeout)
+                user = {}
+                user['uid'] = uid
+                user['last_fetched'] = datetime.datetime.now()
+                db.save_document(collection="weibo",db_name="weibo_database", data)
+                db.save_document(collection='user', db_name='weibo_database', user)
+                data_json = json.dumps(data)
+                user_json = json.dumps(user)
+                f.write(data_json+'\n')
+                u.write(user_json+'\n')
+                
         
             
 
