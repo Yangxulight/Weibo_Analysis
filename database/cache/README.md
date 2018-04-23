@@ -1,0 +1,1 @@
+## This directory will save some datas cached as local file ,not DB.

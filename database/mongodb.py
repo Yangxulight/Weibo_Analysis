@@ -8,7 +8,7 @@ class MongoDB:
         logger.debug("connecting to mongodb at {}:{}".format(host, port))
         self.client = MongoClient('{}:{}'.format(host, port))
         
-    def save_document(self, collection="weibo", db_name="weibo_database", data):
+    def save_document(self, data, collection="weibo", db_name="weibo_database"):
         logger.debug("saving document to condition:{}".format(collection))
         db_collection = self.dispatch(collection, db_name)
         if type(data) == list:
@@ -19,11 +19,11 @@ class MongoDB:
     def dispatch(self, collection, db_name):
         return self.client[db_name][collection]
 
-    def query(self, collection, db_name="weibo_database", condition = ""):
+    def query(self, collection, db_name="weibo_database", condition = {}):
         logger.debug("query from collection:{} with condition{}".format(collection, condition))
         db_collection = self.dispatch(collection, db_name)
         result_list = []
-        if condition == "":
+        if condition == {}:
             # return all documents
             for item in db_collection.find():
                 result_list.append(item)
