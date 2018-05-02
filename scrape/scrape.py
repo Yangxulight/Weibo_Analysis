@@ -7,7 +7,6 @@ import rsa
 import json
 import binascii
 from bs4 import BeautifulSoup
-import 
 
 class WeiboScape:
     def __init__(self, username, password):
